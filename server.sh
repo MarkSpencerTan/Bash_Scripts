@@ -2,10 +2,8 @@
 
 #the trap will cleanup temp files on exit
 function cleanup {
-  echo "cleaning temp files..."
-  rm server.out
-  rm server_response.out
-  rm clientip.out
+  rm -r -f temp
+  exit
 }
 
 trap cleanup SIGINT
@@ -16,31 +14,32 @@ if [[ $# > 0 ]]; then
   port=$1
 else
   #reads port if you don't have any args
-  echo "You can run this script with\n $0 <port>\n"
   echo "Enter port: "
   read port
+fi
+
+#make temp directory if !exist
+if [ ! -d "temp" ]; then
+  mkdir temp
 fi
 
 # Continuously listens for client connectuons.
 while true; do
   echo "Server listening on port: ${port}..."
     #reads the command and ip from the client and stores it into server.out
-    nc -l $port > server.out
-    nc -l $port > clientip.out
+    nc -l $port > temp/server.out
+    nc -l $port > temp/clientip.out
 
     #saves the command from the server in cmd
-    cmd="$(cat server.out)"
+    cmd="$(cat temp/server.out)"
     #saves the ip of the client
-    client_ip=$(cat clientip.out)
+    client_ip=$(cat temp/clientip.out)
 
     #executes cmd in the server and saves result
-    echo -e "$(eval $cmd)" > server_response.out
+    echo -e "$(eval $cmd)" > temp/server_response.out
 
     sleep 1
     
     #sends the command output back to client
-    nc $client_ip $port < server_response.out
-
-    #remove temp files
-    cleanup    
+    nc $client_ip $port < temp/server_response.out
 done
