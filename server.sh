@@ -2,7 +2,9 @@
 
 #the trap will cleanup temp files on exit
 function cleanup {
-  rm -r -f temp
+  rm -f temp/server.out
+  rm -f temp/clientip.out
+  rm -f temp/server_response.out
   exit
 }
 
@@ -35,7 +37,7 @@ while true; do
     #saves the ip of the client
     client_ip=$(cat temp/clientip.out)
 
-    #executes cmd in the server and saves result
+    #evaluates command in the server and saves result
     echo -e "$(eval $cmd)" > temp/server_response.out
 
     sleep 1
